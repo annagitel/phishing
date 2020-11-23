@@ -1,20 +1,13 @@
-    if len(sys.argv) == 4:
-        if 'www' in sys.argv[4]:  # url
-            try:
-                    with urllib.request.urlopen(sys.argv[4]) as f:
-                    mail_body = f.read().decode('utf-8')
-            except:
-                print("failed to read from 4th argument - url")
-
-        elif '.txt' in sys.argv[4]:  # file
-            try:
-                with open(sys.argv[4], 'r') as file:
-                    mail_body = file.read().replace('\n', '')
-            except:
-                print("failed to read from 4th argument")
-
-        else:  # string
-            mail_body = sys.argv[4]
-
-    else:
-        mail_body = fill_template(username, job_title)
+import getpass
+from requests import get
+from scapy.layers.dns import DNS, DNSQR, IP
+from scapy.layers.inet import UDP
+from scapy.sendrecv import send
+import sys
+import smtplib
+import urllib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+from urllib import request

